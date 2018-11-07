@@ -1,5 +1,7 @@
 ---
 title: "p8105_hw5_ml4239"
+author: "Man Luo"
+date: "2018/11/7"
 output: github_document
 ---
 
@@ -10,6 +12,9 @@ library(ggplot2)
 library(grid)
 ```
 
+##P.1
+
+###import and tidy data
 ```{r}
 data = 
   tibble(file_name = list.files(path = './data')) %>% 
@@ -20,16 +25,34 @@ data =
   mutate(week = str_replace(week, "week_", ""),
          file_name = str_replace(file_name, ".csv", ""),
          id = str_replace(id, ".csv", "")) 
+```
+
+###make a spaghetti
+```{r,out.width = "80%"}
 data %>% 
   ggplot(aes(x = week, y = observation, group = file_name, col = group))+
-  geom_line()
+  geom_line() +
+  labs(
+    title = "Observations on Each Subject over Time",
+    x = "Week",
+    y = "Observation",
+    caption = "Data from a longitudinal study") +
+  theme(legend.position = "bottom")
 
+```
+
+```{r}
 
 data %>% 
   ggplot(aes(x = week, y = observation, group = file_name, col = group))+
   geom_line()+
-  facet_grid(~id)
-
+  facet_grid(~id)+
+  labs(
+    title = "Observations on Each Subject over Time by ID",
+    x = "Week",
+    y = "Observation",
+    caption = "Data from a longitudinal study") +
+  theme(legend.position = "bottom")
 ```
 
-The control group has a lower observation data compared to experiment arm. Even thought control and experiment arms might have similar observations for the first several weeks, with the time goes, control group has a lower observations in the end.  
+**Comments**The control group has a lower observation data compared to experiment arm. Even thought control and experiment arms might have similar observations for the first several weeks, with the time goes, control group has a lower observations in the end.  
