@@ -6,15 +6,24 @@ output: github_document
 ```{r setup, include = FALSE, warning = FALSE, message = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(ggplot2)
+library(grid)
 ```
 
 ```{r}
 data = 
   tibble(file_name = list.files(path = './data')) %>% 
-  mutate(name = map(.x = str_c("./data/", file_name),~read_csv(.x))) %>% 
+  mutate(name = map(.x = str_c("./data/", file_name),~read.csv(.x))) %>% 
   unnest() %>% 
-  mutate(file_name = str_replace(file_name, ".csv", "")) %>% 
-  separate(file_name, into = c("group", "id"), sep = "_") 
+  separate(file_name, into = c("group", "id"), sep = "_",remove = F) %>% 
+  gather(key = week, value = observation, week_1:week_8) %>% 
+  mutate(week = str_replace(week, "week_", ""),
+         file_name = str_replace(file_name, ".csv", ""),
+         id = str_replace(id, ".csv", "")) 
+
+data %>% 
+  ggplot(aes(x = week, y = observation, group = file_name, col = group))+
+  geom_line()
 
 ```
 
