@@ -1,0 +1,20 @@
+---
+title: "p8105_hw5_ml4239"
+output: github_document
+---
+
+```{r setup, include = FALSE, warning = FALSE, message = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+```{r}
+data = 
+  tibble(file_name = list.files(path = './data')) %>% 
+  mutate(name = map(.x = str_c("./data/", file_name),~read_csv(.x))) %>% 
+  unnest() %>% 
+  mutate(file_name = str_replace(file_name, ".csv", "")) %>% 
+  separate(file_name, into = c("group", "id"), sep = "_") 
+
+```
+
