@@ -20,10 +20,16 @@ data =
   mutate(week = str_replace(week, "week_", ""),
          file_name = str_replace(file_name, ".csv", ""),
          id = str_replace(id, ".csv", "")) 
-
 data %>% 
   ggplot(aes(x = week, y = observation, group = file_name, col = group))+
   geom_line()
 
+
+data %>% 
+  ggplot(aes(x = week, y = observation, group = file_name, col = group))+
+  geom_line()+
+  facet_grid(~id)
+
 ```
 
+The control group has a lower observation data compared to experiment arm. Even thought control and experiment arms might have similar observations for the first several weeks, with the time goes, control group has a lower observations in the end.  
