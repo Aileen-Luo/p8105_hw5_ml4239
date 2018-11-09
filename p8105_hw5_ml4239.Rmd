@@ -10,15 +10,17 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(ggplot2)
 library(grid)
+library(httr)
+library(knitr)
 ```
 
 ##P.1
 
 ###import and tidy data
-```{r}
+```{r,message = FALSE}
 data = 
-  tibble(file_name = list.files(path = './data')) %>% 
-  mutate(name = map(.x = str_c("./data/", file_name),~read.csv(.x))) %>% 
+  tibble(file_name = list.files(path = './data/P1')) %>% 
+  mutate(name = map(.x = str_c("./data/P1/", file_name),~read_csv(.x))) %>% 
   unnest() %>% 
   separate(file_name, into = c("group", "id"), sep = "_",remove = F) %>% 
   gather(key = week, value = observation, week_1:week_8) %>% 
@@ -41,18 +43,32 @@ data %>%
 
 ```
 
+**Comments**The control group has a lower observation data compared to experiment arm. Even thought control and experiment arms might have similar observations for the first several weeks, with the time goes, control group has a lower observations in the end.  
+
+
+##P.2
+
+```{r message=F}
+homicide_data <- read_csv('./data/P2/homicide-data.csv') 
+
+```
+The raw data contains `r dim(homicide_data)` observations including `r nrow(homicide_data)` people with `r ncol(homicide_data)` variables. The variables includes:`r colnames(homicide_data)`
+
+
+summarize within cities to obtain the total number of homicides and the number of unsolved homicides
 ```{r}
 
-data %>% 
-  ggplot(aes(x = week, y = observation, group = file_name, col = group))+
-  geom_line()+
-  facet_grid(~id)+
-  labs(
-    title = "Observations on Each Subject over Time by ID",
-    x = "Week",
-    y = "Observation",
-    caption = "Data from a longitudinal study") +
-  theme(legend.position = "bottom")
+homicide_data_city_state<-homicide_data %>%  
+  mutate(city_state = str_c(city, ",", state)) 
+
+  
+homicide_num<-homicide_data_city_state %>%   
+  group_by(city_state) %>%
+  summarise( total_homicide = n(),
+    unsolved_homicide = sum(disposition == "Closed without arrest" | disposition == "Open/No arrest")) %>% 
+  knitr::kable()
+
 ```
 
-**Comments**The control group has a lower observation data compared to experiment arm. Even thought control and experiment arms might have similar observations for the first several weeks, with the time goes, control group has a lower observations in the end.  
+
+
