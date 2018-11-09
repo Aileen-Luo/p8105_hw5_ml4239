@@ -69,7 +69,7 @@ homicide_num<-homicide_data_city_state %>%
 
 ```
 
-```{r}
+```{r, message= FALSE}
 homicide_num_MD =  homicide_num %>%
   filter(city_state == "Baltimore,MD")
 
@@ -79,5 +79,36 @@ homicide_num_MD =  homicide_num %>%
   
 ```
 
+```{r,warning= FALSE}
 
+prop_city = function(x, y){
+  
+  selection = prop.test(x,y) %>% 
+    broom::tidy() %>% 
+  select(estimate, conf.low, conf.high) 
+  
+  selection
+  
+}
+
+prop_city<-map2(.x = homicide_num$unsolved_homicide, .y = homicide_num$total_homicide, ~prop_city(.x, .y)) %>% 
+  bind_rows() %>% 
+  mutate(city_state = homicide_num$city_state) %>% 
+  select(city_state, everything())
+
+prop_city
+```
+
+```{r}
+prop_city %>% 
+  ggplot(aes(x = reorder(city_state, estimate), y = estimate)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high)) +
+  theme(axis.text.x = element_text(angle = 80, hjust = 1))+
+  labs(
+    title = "Estimates and CIs for Each City",
+    x = "city, State",
+    y = "Estimates",
+    caption = "Data from the Washington Post")
+```
 
