@@ -27,6 +27,8 @@ data =
   mutate(week = str_replace(week, "week_", ""),
          file_name = str_replace(file_name, ".csv", ""),
          id = str_replace(id, ".csv", "")) 
+
+data
 ```
 
 ###make a spaghetti
@@ -48,6 +50,7 @@ data %>%
 
 ##P.2
 
+###Describe the raw data.
 ```{r message=F}
 homicide_data <- read_csv('./data/P2/homicide-data.csv') 
 
@@ -55,7 +58,7 @@ homicide_data <- read_csv('./data/P2/homicide-data.csv')
 The raw data contains `r dim(homicide_data)` observations including `r nrow(homicide_data)` people with `r ncol(homicide_data)` variables. The variables includes:`r colnames(homicide_data)`
 
 
-summarize within cities to obtain the total number of homicides and the number of unsolved homicides
+###Create a city_state variable & Summarize total_homicides, unsolved_homicides within cities
 ```{r}
 
 homicide_data_city_state<-homicide_data %>%  
@@ -67,25 +70,30 @@ homicide_num<-homicide_data_city_state %>%
   summarise( total_homicide = n(),
     unsolved_homicide = sum(disposition == "Closed without arrest" | disposition == "Open/No arrest")) 
 
+homicide_num
+
 ```
 
+###Estimate the proportion of homicides that are unsolved for the city of Baltimore, MD
 ```{r, message= FALSE}
 homicide_num_MD =  homicide_num %>%
   filter(city_state == "Baltimore,MD")
 
   prop.test(homicide_num_MD$unsolved_homicide, homicide_num_MD$total_homicide) %>% 
     broom::tidy() %>% 
-    select(estimate, conf.low, conf.high)
+    select(estimate, conf.low, conf.high) %>% 
+  knitr::kable()
   
 ```
 
+###Prop.test for each of the cities
 ```{r,warning= FALSE}
 
 prop_city = function(x, y){
   
   selection = prop.test(x,y) %>% 
     broom::tidy() %>% 
-  select(estimate, conf.low, conf.high) 
+  select(estimate, conf.low, conf.high)
   
   selection
   
@@ -94,10 +102,12 @@ prop_city = function(x, y){
 prop_city<-map2(.x = homicide_num$unsolved_homicide, .y = homicide_num$total_homicide, ~prop_city(.x, .y)) %>% 
   bind_rows() %>% 
   mutate(city_state = homicide_num$city_state) %>% 
-  select(city_state, everything())
+  select(city_state, everything()) 
 
 prop_city
 ```
+
+###Create a plot that shows the estimates and CIs for each city
 
 ```{r}
 prop_city %>% 
